@@ -1,0 +1,11 @@
+body {
+    font-family: Arial;
+    margin: 30px;
+}
+
+custom-gantt {
+    display: block;
+    height: 450px;
+    border: 1px solid #ccc;
+    margin-top: 20px;
+}

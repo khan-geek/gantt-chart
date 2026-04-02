@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Custom Gantt</title>
+    <script src="./utils/dateUtils.js"></script>
+    <script src="./core/timeline.js"></script>
+    <script src="./core/taskRenderer.js"></script>
+    <script src="./core/dragManager.js"></script>
+    <script src="./core/resizeManager.js"></script>
+    <script src="./core/dependencyRenderer.js"></script>
+    <script src="./core/ganttStyles.js"></script>
+    <script src="./core/gantt.js"></script>
+</head>
+
+<body>
+
+    <custom-gantt id="gantt"></custom-gantt>
+
+    <script>
+
+        const gantt = document.getElementById("gantt");
+
+        const tasks = [
+
+            {
+                id: "p1",
+                name: "Project A",
+                type: "project"
+            },
+
+            {
+                id: 1,
+                name: "Planning",
+                start: "2026-03-10",
+                end: "2026-03-20",
+                progress: 0.5,
+                parent: "p1"
+            },
+
+            {
+                id: 2,
+                name: "Design",
+                start: "2026-03-21",
+                end: "2026-03-25",
+                progress: 0.2,
+                parent: "p1"
+            },
+
+            {
+                id: 3,
+                name: "Development",
+                start: "2026-03-26",
+                end: "2026-04-05",
+                progress: 0.1,
+                parent: "p1"
+            }
+
+        ];
+        gantt.setData(tasks);
+
+    </script>
+
+</body>
+
+</html>
