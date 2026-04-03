@@ -43,12 +43,12 @@ function createProjectRow(project) {
     return row;
 }
 
-function createTaskRow(task, startDate, dayWidth, step) {
+function createTaskRow(task, startDate, dayWidth, step, holidayKeys) {
     const row = createRow();
     const leftCell = createLeftCell(task.name);
     const rightCell = createRightCell();
     leftCell.style.paddingLeft = "30px";
-    const bar = renderTaskBar(task, startDate, dayWidth, step);
+    const bar = renderTaskBar(task, startDate, dayWidth, step, holidayKeys);
     rightCell.appendChild(bar);
 
     row.appendChild(leftCell);
@@ -65,6 +65,7 @@ class CustomGantt extends HTMLElement {
         this.attachShadow({ mode: "open" });
 
         this.tasks = [];
+        this.holidayKeys = new Set();
         this.currentTask = null;
         this.zoom = "day";
         this.dayWidth = DAY_WIDTH_BY_ZOOM.day.dayWidth;
@@ -83,8 +84,8 @@ class CustomGantt extends HTMLElement {
     setData(tasks) {
         const parsedTasks = tasks.map((task) => ({
             ...task,
-            start: task.start ? new Date(task.start) : null,
-            end: task.end ? new Date(task.end) : null
+            start: task.start ? normalizeDate(parseDateInput(task.start)) : null,
+            end: task.end ? normalizeDate(parseDateInput(task.end)) : null
         }));
 
         const invalidTask = parsedTasks.find(hasInvalidDateRange);
@@ -109,6 +110,18 @@ class CustomGantt extends HTMLElement {
         this.step = zoomConfig.step;
 
         this.syncZoomControl();
+        this.render();
+    }
+
+    setHolidays(holidays) {
+        this.holidayKeys = new Set(
+            (Array.isArray(holidays) ? holidays : [])
+                .map((holiday) => parseDateInput(holiday))
+                .map((holiday) => holiday ? normalizeDate(holiday) : null)
+                .filter(Boolean)
+                .map((holiday) => formatDateInput(holiday))
+        );
+
         this.render();
     }
 
@@ -162,7 +175,8 @@ class CustomGantt extends HTMLElement {
                     task,
                     dateRange.startDate,
                     this.dayWidth,
-                    this.step
+                    this.step,
+                    this.holidayKeys
                 );
                 container.appendChild(taskRow);
             });
@@ -248,8 +262,8 @@ ${ganttStyles}
             if (!this.currentTask) return;
 
             const name = this.shadowRoot.getElementById("taskName").value;
-            const start = new Date(this.shadowRoot.getElementById("taskStart").value);
-            const end = new Date(this.shadowRoot.getElementById("taskEnd").value);
+            const start = parseDateInput(this.shadowRoot.getElementById("taskStart").value);
+            const end = parseDateInput(this.shadowRoot.getElementById("taskEnd").value);
 
             if (hasInvalidDateRange({ start, end })) {
                 warning.textContent = "Start date cannot be later than end date.";
@@ -283,8 +297,7 @@ ${ganttStyles}
             return task.end > latest ? task.end : latest;
         }, datedTasks[0].end);
 
-        const totalDays =
-            Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+        const totalDays = getCalendarDayOffset(startDate, endDate) + 1;
 
         return { startDate, endDate, totalDays };
     }
@@ -302,9 +315,9 @@ ${ganttStyles}
                 modal.style.display = "block";
                 this.shadowRoot.getElementById("taskName").value = this.currentTask.name;
                 this.shadowRoot.getElementById("taskStart").value =
-                    this.currentTask.start.toISOString().split("T")[0];
+                    formatDateInput(this.currentTask.start);
                 this.shadowRoot.getElementById("taskEnd").value =
-                    this.currentTask.end.toISOString().split("T")[0];
+                    formatDateInput(this.currentTask.end);
             });
         });
     }

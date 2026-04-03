@@ -55,7 +55,7 @@ function enableResize(root, tasks, dayWidth, step = 1, onChange = null) {
         // Turn the final bar width into a new task end date.
         const stepsCount = Math.round(activeBar.offsetWidth / dayWidth);
         const durationDays = stepsCount * step;
-        const newEnd = new Date(activeTask.start);
+        const newEnd = normalizeDate(activeTask.start);
 
         newEnd.setDate(newEnd.getDate() + durationDays - 1);
 
@@ -66,7 +66,7 @@ function enableResize(root, tasks, dayWidth, step = 1, onChange = null) {
             return;
         }
 
-        activeTask.end = newEnd;
+        activeTask.end = normalizeDate(newEnd);
 
         if (typeof onChange === "function") {
             onChange();

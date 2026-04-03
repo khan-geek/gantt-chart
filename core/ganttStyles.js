@@ -73,6 +73,13 @@ text-align:center;
 border-right:1px solid #eee;
 font-size:12px;
 padding:4px;
+box-sizing:border-box;
+}
+
+.timeline-day-holiday{
+background:#fff1db;
+color:#9a3412;
+font-weight:600;
 }
 
 .task-bar{
@@ -83,12 +90,29 @@ background:#4CAF50;
 border-radius:4px;
 cursor:move;
 z-index:1;
+overflow:hidden;
 }
 
 .progress{
 height:100%;
 background:#2E7D32;
 border-radius:4px;
+}
+
+.holiday-layer{
+position:absolute;
+inset:0;
+pointer-events:none;
+z-index:2;
+}
+
+.holiday-marker{
+position:absolute;
+top:0;
+bottom:0;
+background:rgba(245,158,11,0.45);
+border-left:1px solid rgba(180,83,9,0.45);
+border-right:1px solid rgba(180,83,9,0.45);
 }
 
 .resize-handle{
@@ -98,6 +122,7 @@ width:6px;
 height:100%;
 background:#333;
 cursor:ew-resize;
+z-index:3;
 }
 
 #modal{

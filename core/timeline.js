@@ -24,6 +24,9 @@ function renderTimeline(container, start, days, dayWidth, step) {
 
         const div = document.createElement("div");
         div.className = "timeline-day";
+        if (step === 1 && isHolidayDate(d)) {
+            div.classList.add("timeline-day-holiday");
+        }
         div.style.width = dayWidth + "px";
         div.style.flex = "0 0 auto";
         div.innerText = label;

@@ -68,14 +68,14 @@ function enableDragging(root, tasks, dayWidth, step = 1, onChange = null) {
         }
 
         const daysMoved = stepsMoved * step;
-        const newStart = new Date(activeTask.start);
-        const newEnd = new Date(activeTask.end);
+        const newStart = normalizeDate(activeTask.start);
+        const newEnd = normalizeDate(activeTask.end);
 
         newStart.setDate(newStart.getDate() + daysMoved);
         newEnd.setDate(newEnd.getDate() + daysMoved);
 
-        activeTask.start = newStart;
-        activeTask.end = newEnd;
+        activeTask.start = normalizeDate(newStart);
+        activeTask.end = normalizeDate(newEnd);
 
         if (typeof onChange === "function") {
             onChange();
