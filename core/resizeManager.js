@@ -1,4 +1,24 @@
 function enableResize(root, tasks, dayWidth, step = 1, onChange = null) {
+    function isNearRightEdge(bar, event, threshold = 10) {
+        const barRect = bar.getBoundingClientRect();
+        return barRect.right - event.clientX <= threshold;
+    }
+
+    function startResize(bar, event) {
+        event.stopPropagation();
+
+        activeBar = bar;
+        activeTask = Array.isArray(tasks)
+            ? tasks.find((task) => task.id == activeBar.dataset.id)
+            : null;
+        if (!activeTask) return;
+
+        // Save the starting mouse position and bar width.
+        startX = event.clientX;
+        initialWidth = activeBar.offsetWidth;
+        document.body.style.userSelect = "none";
+    }
+
     function snapToGrid(value, width) {
         return Math.round(value / width) * width;
     }
@@ -23,18 +43,16 @@ function enableResize(root, tasks, dayWidth, step = 1, onChange = null) {
 
     root.querySelectorAll(".resize-handle").forEach((handle) => {
         handle.addEventListener("mousedown", (event) => {
-            event.stopPropagation();
+            startResize(handle.parentElement, event);
+        });
+    });
 
-            activeBar = handle.parentElement;
-            activeTask = Array.isArray(tasks)
-                ? tasks.find((task) => task.id == activeBar.dataset.id)
-                : null;
-            if (!activeTask) return;
+    root.querySelectorAll(".task-bar").forEach((bar) => {
+        bar.addEventListener("mousedown", (event) => {
+            if (!isNearRightEdge(bar, event)) return;
 
-            // Save the starting mouse position and bar width.
-            startX = event.clientX;
-            initialWidth = activeBar.offsetWidth;
-            document.body.style.userSelect = "none";
+            event.stopImmediatePropagation();
+            startResize(bar, event);
         });
     });
 

@@ -188,14 +188,14 @@ class CustomGantt extends HTMLElement {
         );
         dependencyLayer.setAttribute("height", container.scrollHeight);
 
-        enableDragging(
+        enableResize(
             this.shadowRoot,
             this.tasks,
             this.dayWidth,
             this.step,
             () => this.render()
         );
-        enableResize(
+        enableDragging(
             this.shadowRoot,
             this.tasks,
             this.dayWidth,
