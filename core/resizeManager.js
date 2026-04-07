@@ -11,7 +11,11 @@ function enableResize(root, tasks, dayWidth, step = 1, onChange = null) {
         activeTask = Array.isArray(tasks)
             ? tasks.find((task) => task.id == activeBar.dataset.id)
             : null;
-        if (!activeTask) return;
+        if (!activeTask || activeTask.type === "project") {
+            activeBar = null;
+            activeTask = null;
+            return;
+        }
 
         // Save the starting mouse position and bar width.
         startX = event.clientX;
@@ -49,6 +53,7 @@ function enableResize(root, tasks, dayWidth, step = 1, onChange = null) {
 
     root.querySelectorAll(".task-bar").forEach((bar) => {
         bar.addEventListener("mousedown", (event) => {
+            if (bar.classList.contains("task-bar-summary")) return;
             if (!isNearRightEdge(bar, event)) return;
 
             event.stopImmediatePropagation();

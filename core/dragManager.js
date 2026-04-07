@@ -1,4 +1,21 @@
 function enableDragging(root, tasks, dayWidth, step = 1, onChange = null) {
+    function shiftTaskDates(task, daysMoved) {
+        const newStart = normalizeDate(task.start);
+        const newEnd = normalizeDate(task.end);
+
+        newStart.setDate(newStart.getDate() + daysMoved);
+        newEnd.setDate(newEnd.getDate() + daysMoved);
+
+        task.start = normalizeDate(newStart);
+        task.end = normalizeDate(newEnd);
+    }
+
+    function getChildTasks(parentId) {
+        return Array.isArray(tasks)
+            ? tasks.filter((task) => task.parent === parentId && task.start && task.end)
+            : [];
+    }
+
     function snapToGrid(value, width) {
         return Math.round(value / width) * width;
     }
@@ -68,14 +85,13 @@ function enableDragging(root, tasks, dayWidth, step = 1, onChange = null) {
         }
 
         const daysMoved = stepsMoved * step;
-        const newStart = normalizeDate(activeTask.start);
-        const newEnd = normalizeDate(activeTask.end);
-
-        newStart.setDate(newStart.getDate() + daysMoved);
-        newEnd.setDate(newEnd.getDate() + daysMoved);
-
-        activeTask.start = normalizeDate(newStart);
-        activeTask.end = normalizeDate(newEnd);
+        if (activeTask.type === "project") {
+            getChildTasks(activeTask.id).forEach((childTask) => {
+                shiftTaskDates(childTask, daysMoved);
+            });
+        } else {
+            shiftTaskDates(activeTask, daysMoved);
+        }
 
         if (typeof onChange === "function") {
             onChange();

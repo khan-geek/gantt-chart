@@ -36,10 +36,63 @@ function createRightCell() {
     return cell;
 }
 
-function createProjectRow(project) {
+function getChildTasks(tasks, parentId) {
+    return tasks.filter((task) => task.parent === parentId && task.start && task.end);
+}
+
+function getTaskDurationDays(task) {
+    return getCalendarDayOffset(task.start, task.end) + 1;
+}
+
+function getSummaryProgress(children) {
+    const datedChildren = children.filter((task) => task.start && task.end);
+    if (!datedChildren.length) return 0;
+
+    const totalDuration = datedChildren.reduce((sum, task) => {
+        return sum + getTaskDurationDays(task);
+    }, 0);
+
+    if (!totalDuration) return 0;
+
+    const completedDuration = datedChildren.reduce((sum, task) => {
+        return sum + (getTaskDurationDays(task) * (task.progress || 0));
+    }, 0);
+
+    return completedDuration / totalDuration;
+}
+
+function getSummaryTask(project, children) {
+    const datedChildren = children.filter((task) => task.start && task.end);
+    if (!datedChildren.length) return null;
+
+    const start = datedChildren.reduce((earliest, task) => {
+        return task.start < earliest ? task.start : earliest;
+    }, datedChildren[0].start);
+
+    const end = datedChildren.reduce((latest, task) => {
+        return task.end > latest ? task.end : latest;
+    }, datedChildren[0].end);
+
+    return {
+        ...project,
+        start,
+        end,
+        progress: getSummaryProgress(datedChildren)
+    };
+}
+
+function createProjectRow(project, summaryTask, startDate, dayWidth, step, holidayKeys) {
     const row = createRow();
     row.appendChild(createLeftCell(project.name, true));
-    row.appendChild(createRightCell());
+    const rightCell = createRightCell();
+
+    if (summaryTask) {
+        rightCell.appendChild(
+            renderSummaryBar(summaryTask, startDate, dayWidth, step, holidayKeys)
+        );
+    }
+
+    row.appendChild(rightCell);
     return row;
 }
 
@@ -167,7 +220,15 @@ class CustomGantt extends HTMLElement {
         });
 
         Array.from(groups.values()).forEach((group) => {
-            const projectRow = createProjectRow(group.project);
+            const summaryTask = getSummaryTask(group.project, group.children);
+            const projectRow = createProjectRow(
+                group.project,
+                summaryTask,
+                dateRange.startDate,
+                this.dayWidth,
+                this.step,
+                this.holidayKeys
+            );
             container.appendChild(projectRow);
 
             group.children.forEach((task) => {
@@ -309,7 +370,7 @@ ${ganttStyles}
             bar.addEventListener("dblclick", () => {
                 const id = bar.dataset.id;
                 this.currentTask = this.tasks.find((task) => task.id == id);
-                if (!this.currentTask) return;
+                if (!this.currentTask || this.currentTask.type === "project") return;
 
                 this.shadowRoot.getElementById("dateWarning").textContent = "";
                 modal.style.display = "block";

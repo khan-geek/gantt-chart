@@ -93,10 +93,24 @@ z-index:1;
 overflow:hidden;
 }
 
+.task-bar-summary{
+height:20px;
+top:10px;
+background:#2563eb;
+border-radius:999px;
+cursor:move;
+}
+
 .progress{
 height:100%;
 background:#2E7D32;
 border-radius:4px;
+}
+
+.progress-summary{
+height:100%;
+background:#1d4ed8;
+border-radius:999px;
 }
 
 .holiday-layer{
