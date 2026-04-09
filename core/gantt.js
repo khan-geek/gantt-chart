@@ -2,7 +2,8 @@ const SIDEBAR_WIDTH = 250;
 const DAY_WIDTH_BY_ZOOM = {
     day: { dayWidth: 40, step: 1 },
     week: { dayWidth: 80, step: 7 },
-    month: { dayWidth: 120, step: 30 }
+    month: { dayWidth: 120, step: 30 },
+    year: { dayWidth: 160, step: 365 }
 };
 
 function hasInvalidDateRange(task) {
@@ -108,6 +109,26 @@ function createTaskRow(task, startDate, dayWidth, step, holidayKeys) {
     row.appendChild(rightCell);
 
     return row;
+}
+
+function renderTodayIndicator(container, startDate, endDate, dayWidth, step) {
+    const existingIndicator = container.querySelector(".today-indicator");
+    if (existingIndicator) {
+        existingIndicator.remove();
+    }
+
+    const today = normalizeDate(new Date());
+    if (today < startDate || today > endDate) return;
+
+    const indicator = document.createElement("div");
+    indicator.className = "today-indicator";
+    indicator.style.left = `${SIDEBAR_WIDTH + ((getCalendarDayOffset(startDate, today) / step) * dayWidth)}px`;
+    indicator.innerHTML = `
+        <div class="today-indicator-line"></div>
+        <div class="today-indicator-label">Today</div>
+    `;
+
+    container.appendChild(indicator);
 }
 
 class CustomGantt extends HTMLElement {
@@ -248,6 +269,13 @@ class CustomGantt extends HTMLElement {
             Math.max(container.clientWidth - SIDEBAR_WIDTH, 0)
         );
         dependencyLayer.setAttribute("height", container.scrollHeight);
+        renderTodayIndicator(
+            container,
+            dateRange.startDate,
+            dateRange.endDate,
+            this.dayWidth,
+            this.step
+        );
 
         enableResize(
             this.shadowRoot,
@@ -279,6 +307,7 @@ ${ganttStyles}
 <option value="day">Day</option>
 <option value="week">Week</option>
 <option value="month">Month</option>
+<option value="year">Year</option>
 </select>
 </div>
 

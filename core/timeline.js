@@ -18,8 +18,11 @@ function renderTimeline(container, start, days, dayWidth, step) {
         else if (step === 7) {
             label = "W" + getWeekNumber(d);
         }
-        else {
+        else if (step === 30) {
             label = d.toLocaleString("default", { month: "short" });
+        }
+        else {
+            label = String(d.getFullYear());
         }
 
         const div = document.createElement("div");
